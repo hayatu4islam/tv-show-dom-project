@@ -1,14 +1,36 @@
 //You can edit ALL of the code here
 function setup() {
   var allEpisodes = getAllEpisodes();
-  const oneEpi = getOneEpisode();
-  // console.log(oneEpi);
+  // const oneEpi = getOneEpisode();
   makePageForEpisodes(allEpisodes);
+  
 }
 
 var containerHead = document.createElement("div");
 containerHead.setAttribute("class", "container-head");
 document.body.prepend(containerHead);
+
+const select = document.createElement("select");
+select.style.marginLeft = "70px";
+containerHead.appendChild(select);
+const option = document.createElement("option");
+option.value = -10;
+option.text = "All Episodes";
+select.appendChild(option);
+
+var counter = 0;
+// select.firstElementChild('[value="basic"]').remove();
+let allEpisodes = getAllEpisodes();
+allEpisodes.forEach((episode) => {
+  const opt = document.createElement("option");
+  opt.value = counter;
+  counter++;
+  // opt.innerText = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+  opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+  select.appendChild(opt);
+});
+
+
 
 const searchField = document.createElement("input");
 searchField.id = "input";
@@ -17,42 +39,43 @@ searchField.setAttribute("placeholder", "Search for episodes");
 containerHead.appendChild(searchField);
 
 
-// ----------UPDATE EPISODE LISTS-----------------------
-// const searchField = document.getElementById("input");
+// ----------UPDATE EPISODE LISTS ON INPUT-----------------------
+
 const rootElement = document.getElementById("root");
 const matchEpisodeDisplay = document.createElement("label");
-// matchEpisodeDisplay.innerHTML = "";
-matchEpisodeDisplay.innerHTML = "73 / 73 Episodes are found";
+// matchEpisodeDisplay.innerHTML = " Displaying 73 / 73 episodes";
+matchEpisodeDisplay.innerHTML = " ";
 matchEpisodeDisplay.setAttribute("class", "displayLabel");
 containerHead.appendChild(matchEpisodeDisplay);
 
-searchField.addEventListener("keyup", modifyEpisodes);
-let episodesFound = "";
-
-let allEpisodes = getAllEpisodes();
-function modifyEpisodes(e){
+searchField.addEventListener("keyup", (e) =>{
+  let episodesFound = "";
+  let allEpisodes = getAllEpisodes();
   let currentValue = e.target.value.toLowerCase();
   rootElement.innerHTML = "";
-  episodesFound = allEpisodes.filter(
-    (ep) =>
-    ep.name.toLowerCase().includes(currentValue) ||
-    ep.summary.toLowerCase().includes(currentValue));
-    console.log(episodesFound);
-    makePageForEpisodes(episodesFound);
-    matchEpisodeDisplay.innerHTML = ` ${episodesFound.length} / ${allEpisodes.length} Episodes are found`;
+  episodesFound = allEpisodes.filter((epi) =>
+      epi.name.toLowerCase().includes(currentValue) || epi.summary.toLowerCase().includes(currentValue)
+  );
+  makePageForEpisodes(episodesFound);
+  matchEpisodeDisplay.innerHTML = ` Displaying ${episodesFound.length} / ${allEpisodes.length} episodes`;
+});
+
+
+select.addEventListener("change", (e) => {
+  let selectedEpisode = "";
+  matchEpisodeDisplay.innerHTML = " ";
+  let allEpisodes = getAllEpisodes();
+  if(select.value >= 0){
+    selectedEpisode = [allEpisodes[select.value]];
+    // selectedEpisode = allEpisodes;
+  }else{
+    selectedEpisode = allEpisodes;
+    matchEpisodeDisplay.innerHTML = " Displaying 73 / 73 episodes";
+    // selectedEpisode = [allEpisodes[select.value]];
   }
-
-  // searchField.addEventListener("keyup", (e) => {
-  //   // console.log(e.target.value);
-  //   const episodes = getAllEpisodes();
-  //   let episodesFound = "";
-  //   episodesFound = episodes.filter((epi) => {
-  //     epi.name.toLowerCase().includes(e.target.value.toLowerCase()) || epi.summary.toLowerCase().includes(e.target.value.toLowerCase());
-  //   });
-  //   makePageForEpisodes(episodesFound);
-  // });
-// }
-
+  rootElement.innerHTML = "";
+  makePageForEpisodes(selectedEpisode);
+});
 
 // ---------------MAKE PAGE FOR EPISODES FUNCTION---------------------
 function makePageForEpisodes(episodeList) {
@@ -60,6 +83,17 @@ function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
   rootElem.className = "root";
   // rootElem.textContent = `Got ${episodeList.length} episode(s)`;
+  // var counter = 0;
+  // // select.firstElementChild('[value="basic"]').remove();
+  // let allEpisodes = getAllEpisodes();
+  // allEpisodes.forEach((episode) => {
+  //   const opt = document.createElement("option");
+  //   opt.value = counter;
+  //   counter++;
+  //   // opt.innerText = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+  //   opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+  //   select.appendChild(opt);
+  // });
 
   episodeList.forEach((episode) => {
     const episodesContainer = document.createElement("div");
@@ -68,7 +102,10 @@ function makePageForEpisodes(episodeList) {
     // rootElem.className = "root"
     const episodeName = document.createElement("h3");
     episodeName.className = "episode-name";
-    episodeName.innerText = `${episode.name} - ${episodeCode(episode.season, episode.number)}`;
+    episodeName.innerText = `${episode.name} - ${episodeCode(
+      episode.season,
+      episode.number
+    )}`;
     episodesContainer.appendChild(episodeName);
     // Create an image
     const episodeImage = document.createElement("img");
@@ -79,11 +116,21 @@ function makePageForEpisodes(episodeList) {
     episodeSummary.innerHTML = episode.summary;
     episodeSummary.className = "summary-text";
     episodesContainer.appendChild(episodeSummary);
+  });
 
-  })
-  
-
+  // Add footer container to state where the source of the data used.
+  const footerContainer = document.createElement("div");
+  footerContainer.setAttribute("class", "footer-container");
+  rootElem.appendChild(footerContainer);
+  const footerText = document.createElement("p");
+  footerText.className = "footer-text";
+  footerText.innerHTML =
+    "The data used in this page is originally from <a href='https://www.tvmaze.com/'>TVMaze.com</a>";
+  footerContainer.appendChild(footerText);
+  footerText.style.textAlign = "center";
+  footerText.style.color = "purple";
 }
+//--------------------END OF THE MAKEPAGEFOREPISODE() FUNCTION-------------------------
 
 function episodeCode(season, number){
   season = season < 10 ? "0" + season : season;
