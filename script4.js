@@ -1,25 +1,42 @@
 //You can edit ALL of the code here
-let allEpisodes;
+/*
+fetch("https://api.tvmaze.com/shows")
+    // Get the response and extract the JSON
+    .then(function (response) {
+      return response.json();
+    })
+    // Do something with the JSON
+    .then((episodes) => {
+      console.log(episodes);
+      allEpisodes = episodes;
+      makePageForEpisodes(allEpisodes);
+      selectFunc();
+    })
+    // If something goes wrong
+    .catch((error) => console.log(error));
+  // const oneEpi = getOneEpisode();
+*/
+let allShows;
 function setup() {
   // var allEpisodes = getAllEpisodes();
-  
+
   // fetch("https://api.tvmaze.com/shows/82/episodes")
-    fetch("https://api.tvmaze.com/shows")
-      // Get the response and extract the JSON
-      .then(function (response) {
-        return response.json();
-      })
-      // Do something with the JSON
-      .then((episodes) => {
-        console.log(episodes);
-        allEpisodes = episodes;
-        makePageForEpisodes(allEpisodes);
-        selectFunc();
-      })
-      // If something goes wrong
-      .catch((error) => console.log(error));
+  fetch("https://api.tvmaze.com/shows")
+    // Get the response and extract the JSON
+    .then(function (response) {
+      return response.json();
+    })
+    // Do something with the JSON
+    .then((shows) => {
+      console.log(shows);
+      allShows = shows;
+      makePageForEpisodes(allShows);
+    //   selectFunc();
+    selectShowFunc();
+    })
+    // If something goes wrong
+    .catch((error) => console.log(error));
   // const oneEpi = getOneEpisode();
-  
 }
 
 var containerHead = document.createElement("div");
@@ -42,21 +59,32 @@ option.value = -10;
 option.text = "All Episodes";
 select.appendChild(option);
 
-
+var showCount = 0;
+const selectShowFunc = () => {
+    allShows.forEach((show) => {
+        const opt = document.createElement("option");
+        opt.value = showCount;
+        showCount++;
+        opt.text = `${show.name}`;
+        selectShow.appendChild(opt);
+    })
+}
 
 var counter = 0;
 // select.firstElementChild('[value="basic"]').remove();
 // allEpisodes = getAllEpisodes();
 const selectFunc = () => {
   allEpisodes.forEach((episode) => {
-  const opt = document.createElement("option");
-  opt.value = counter;
-  counter++;
-  // opt.innerText = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
-  opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
-  select.appendChild(opt);
-});
-}
+    const opt = document.createElement("option");
+    opt.value = counter;
+    counter++;
+    // opt.innerText = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+    opt.text = `${episodeCode(episode.season, episode.number)} - ${
+      episode.name
+    }`;
+    select.appendChild(opt);
+  });
+};
 
 const searchField = document.createElement("input");
 searchField.id = "input";
@@ -65,7 +93,6 @@ searchField.setAttribute("placeholder", "Search for episodes");
 containerHead.appendChild(searchField);
 
 //--------------POPULATE THE SHOW LIST -----------------
-
 
 // ----------UPDATE EPISODE LISTS ON INPUT-----------------------
 
@@ -106,24 +133,50 @@ select.addEventListener("change", (e) => {
   makePageForEpisodes(selectedEpisode);
 });
 
+function makePageForShows(showList) {
+  // console.log(episodeList);
+  const rootElem = document.getElementById("root");
+  rootElem.className = "root";
+
+  episodeList.forEach((episode) => {
+    const episodesContainer = document.createElement("div");
+    episodesContainer.setAttribute("class", "episode-container");
+    rootElem.appendChild(episodesContainer);
+    // rootElem.className = "root"
+    const episodeName = document.createElement("h3");
+    episodeName.className = "episode-name";
+    episodeName.innerText = `${show.name}`;
+    episodesContainer.appendChild(episodeName);
+    // Create an image
+    const episodeImage = document.createElement("img");
+    episodeImage.setAttribute("src", episode.image.medium);
+    episodesContainer.appendChild(episodeImage);
+    // Add the summary
+    const episodeSummary = document.createElement("p");
+    episodeSummary.innerHTML = episode.summary;
+    episodeSummary.className = "summary-text";
+    episodesContainer.appendChild(episodeSummary);
+  });
+
+  // Add footer container to state where the source of the data used.
+  const footerContainer = document.createElement("div");
+  footerContainer.setAttribute("class", "footer-container");
+  rootElem.appendChild(footerContainer);
+  const footerText = document.createElement("p");
+  footerText.className = "footer-text";
+  footerText.innerHTML =
+    "The data used in this page is originally from <a href='https://www.tvmaze.com/'>TVMaze.com</a>";
+  footerContainer.appendChild(footerText);
+  footerText.style.textAlign = "center";
+  footerText.style.color = "purple";
+}
+
 // ---------------MAKE PAGE FOR EPISODES FUNCTION---------------------
 function makePageForEpisodes(episodeList) {
   // console.log(episodeList);
   const rootElem = document.getElementById("root");
   rootElem.className = "root";
-  // rootElem.textContent = `Got ${episodeList.length} episode(s)`;
-  // var counter = 0;
-  // // select.firstElementChild('[value="basic"]').remove();
-  // let allEpisodes = getAllEpisodes();
-  // allEpisodes.forEach((episode) => {
-  //   const opt = document.createElement("option");
-  //   opt.value = counter;
-  //   counter++;
-  //   // opt.innerText = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
-  //   opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
-  //   select.appendChild(opt);
-  // });
-
+  
   episodeList.forEach((episode) => {
     const episodesContainer = document.createElement("div");
     episodesContainer.setAttribute("class", "episode-container");
@@ -160,6 +213,10 @@ function makePageForEpisodes(episodeList) {
   footerText.style.color = "purple";
 }
 //--------------------END OF THE MAKEPAGEFOREPISODE() FUNCTION-------------------------
+
+function showCode(){
+    
+}
 
 function episodeCode(season, number) {
   season = season < 10 ? "0" + season : season;
