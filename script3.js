@@ -1,14 +1,38 @@
 //You can edit ALL of the code here
+let allEpisodes;
 function setup() {
-  var allEpisodes = getAllEpisodes();
+  // var allEpisodes = getAllEpisodes();
+  
+  // fetch("https://api.tvmaze.com/shows/82/episodes")
+    fetch("https://api.tvmaze.com/shows")
+      // Get the response and extract the JSON
+      .then(function (response) {
+        return response.json();
+      })
+      // Do something with the JSON
+      .then((episodes) => {
+        console.log(episodes);
+        allEpisodes = episodes;
+        makePageForEpisodes(allEpisodes);
+        selectFunc();
+      })
+      // If something goes wrong
+      .catch((error) => console.log(error));
   // const oneEpi = getOneEpisode();
-  makePageForEpisodes(allEpisodes);
   
 }
 
 var containerHead = document.createElement("div");
 containerHead.setAttribute("class", "container-head");
 document.body.prepend(containerHead);
+
+const selectShow = document.createElement("select");
+selectShow.marginLeft = "170px";
+containerHead.appendChild(selectShow);
+const showOption = document.createElement("option");
+showOption.value = -20;
+showOption.text = "All Shows";
+selectShow.appendChild(showOption);
 
 const select = document.createElement("select");
 select.style.marginLeft = "70px";
@@ -18,10 +42,13 @@ option.value = -10;
 option.text = "All Episodes";
 select.appendChild(option);
 
+
+
 var counter = 0;
 // select.firstElementChild('[value="basic"]').remove();
-let allEpisodes = getAllEpisodes();
-allEpisodes.forEach((episode) => {
+// allEpisodes = getAllEpisodes();
+const selectFunc = () => {
+  allEpisodes.forEach((episode) => {
   const opt = document.createElement("option");
   opt.value = counter;
   counter++;
@@ -29,14 +56,15 @@ allEpisodes.forEach((episode) => {
   opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
   select.appendChild(opt);
 });
-
-
+}
 
 const searchField = document.createElement("input");
 searchField.id = "input";
 searchField.setAttribute("autocomplete", "off");
 searchField.setAttribute("placeholder", "Search for episodes");
 containerHead.appendChild(searchField);
+
+//--------------POPULATE THE SHOW LIST -----------------
 
 
 // ----------UPDATE EPISODE LISTS ON INPUT-----------------------
@@ -48,27 +76,28 @@ matchEpisodeDisplay.innerHTML = " ";
 matchEpisodeDisplay.setAttribute("class", "displayLabel");
 containerHead.appendChild(matchEpisodeDisplay);
 
-searchField.addEventListener("keyup", (e) =>{
+searchField.addEventListener("keyup", (e) => {
   let episodesFound = "";
-  let allEpisodes = getAllEpisodes();
+  // let allEpisodes = getAllEpisodes();
   let currentValue = e.target.value.toLowerCase();
   rootElement.innerHTML = "";
-  episodesFound = allEpisodes.filter((epi) =>
-      epi.name.toLowerCase().includes(currentValue) || epi.summary.toLowerCase().includes(currentValue)
+  episodesFound = allEpisodes.filter(
+    (epi) =>
+      epi.name.toLowerCase().includes(currentValue) ||
+      epi.summary.toLowerCase().includes(currentValue)
   );
   makePageForEpisodes(episodesFound);
   matchEpisodeDisplay.innerHTML = ` Displaying ${episodesFound.length} / ${allEpisodes.length} episodes`;
 });
 
-
 select.addEventListener("change", (e) => {
   let selectedEpisode = "";
   matchEpisodeDisplay.innerHTML = " ";
   let allEpisodes = getAllEpisodes();
-  if(select.value >= 0){
+  if (select.value >= 0) {
     selectedEpisode = [allEpisodes[select.value]];
     // selectedEpisode = allEpisodes;
-  }else{
+  } else {
     selectedEpisode = allEpisodes;
     matchEpisodeDisplay.innerHTML = " Displaying 73 / 73 episodes";
     // selectedEpisode = [allEpisodes[select.value]];
@@ -132,7 +161,7 @@ function makePageForEpisodes(episodeList) {
 }
 //--------------------END OF THE MAKEPAGEFOREPISODE() FUNCTION-------------------------
 
-function episodeCode(season, number){
+function episodeCode(season, number) {
   season = season < 10 ? "0" + season : season;
   number = number < 10 ? "0" + number : number;
   return `S${season}E${number}`;
