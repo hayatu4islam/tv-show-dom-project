@@ -38,3 +38,15 @@ body {
   margin: auto;
 }
 
+.container-head {
+  margin: 2rem;
+}
+
+select {
+  height: 30px;
+  background-color: rgb(153, 139, 139);
+}
+
+input {
+  height: 30px;
+}
