@@ -8,44 +8,41 @@ rootElem.className = "root";
 let matchEpisodeDisplay;
 
 const setup = async () => {
-    try {
-        const response = fetch(showUrl);
-        let shows = await (await response).json();
-        allShows = shows.sort(function (a, b) {
-        const n1 = a.name,
-          n2 = b.name;
-        if (n1 < n2) return -1;
-        if (n1 > n2) return 1;
-        return 0;
+  try {
+    const response = fetch(showUrl);
+    let shows = await (await response).json();
+    allShows = shows.sort(function (a, b) {
+      const n1 = a.name,
+        n2 = b.name;
+      if (n1 < n2) return -1;
+      if (n1 > n2) return 1;
+      return 0;
+    });
+    populateShowList(allShows);
+    let firstShow = allShows[0];
+    console.log(firstShow);
+    let showId = firstShow.id;
+    episodeUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
+    console.log(episodeUrl);
+
+    // let allEpisodes;
+    fetch(episodeUrl)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (json) {
+        allEpisodes = json;
+        populateEpisodeList(allEpisodes);
+        makePageForEpisodes(allEpisodes);
+        // console.log(allEpisodes);
       });
-      populateShowList(allShows);
-      let firstShow = allShows[0];
-      console.log(firstShow);
-      let showId = firstShow.id;
-      episodeUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
-      console.log(episodeUrl);
-      
-      // let allEpisodes;
-      fetch(episodeUrl)
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (json) {
-          allEpisodes = json;
-          populateEpisodeList(allEpisodes);
-          makePageForEpisodes(allEpisodes);
-          // console.log(allEpisodes);
-        });
-    } 
-    catch(error){
-        console.log(error);
-    }
-}
-
-
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 function makePageForEpisodes(episodeList) {
-  // console.log(episodeList); 
+  // console.log(episodeList);
   episodeList.forEach((episode) => {
     const episodesContainer = document.createElement("div");
     episodesContainer.setAttribute("class", "episode-container");
@@ -81,14 +78,13 @@ function makePageForEpisodes(episodeList) {
   footerText.style.color = "purple";
 }
 
-
 const populateShowList = (allShows) => {
   var showCount = 0;
   // allShows.sort((a, b) => {return a - b});
   allShows.forEach((show) => {
     const opt = document.createElement("option");
     opt.value = showCount;
-    if(showCount === 0){
+    if (showCount === 0) {
       opt.selected = "selected";
     }
     showCount++;
@@ -103,10 +99,12 @@ const populateEpisodeList = (episodes) => {
     const opt = document.createElement("option");
     opt.value = epiCount;
     epiCount++;
-    opt.text = `${episodeCode(episode.season, episode.number)} - ${episode.name}`;
+    opt.text = `${episodeCode(episode.season, episode.number)} - ${
+      episode.name
+    }`;
     selectEpisode.appendChild(opt);
-  })
-}
+  });
+};
 
 const fetchEpisodeData = (url) => {
   fetch(url)
@@ -119,10 +117,10 @@ const fetchEpisodeData = (url) => {
   // return allEpisodes;
 };
 
-
 var containerHead = document.createElement("div");
 containerHead.setAttribute("class", "container-head");
-containerHead.style.backgroundColor ="#ffff23";
+containerHead.style.backgroundColor = "green";
+containerHead.style.height = "100px";
 document.body.prepend(containerHead);
 
 const selectShow = document.createElement("select");
@@ -144,7 +142,6 @@ let showCount = 0;
 //   opt.text = `${show.name}`;
 //   selectShow.appendChild(opt);
 // });
-
 
 const selectEpisode = document.createElement("select");
 selectEpisode.id = "select-episode";
@@ -168,16 +165,13 @@ matchEpisodeDisplay.innerHTML = " ";
 matchEpisodeDisplay.setAttribute("class", "display-label");
 containerHead.appendChild(matchEpisodeDisplay);
 
-
-
-
 selectShow.addEventListener("change", (e) => {
   let selectedShow = "";
   // let newShowUrl;
   let allEpisodes;
-  if(selectShow.value >= 0){
+  if (selectShow.value >= 0) {
     selectedShow = [allShows[selectShow.value]];
-  }else{
+  } else {
     selectedShow = allShows;
   }
   rootElem.innerHTML = "";
@@ -195,27 +189,28 @@ selectShow.addEventListener("change", (e) => {
       makePageForEpisodes(allEpisodes);
       console.log(allEpisodes);
     });
-})
+});
 
 selectEpisode.addEventListener("change", (e) => {
   let selectedEpisode = "";
-  if(selectEpisode.value >= 0){
+  if (selectEpisode.value >= 0) {
     selectedEpisode = [allEpisodes[selectEpisode.value]];
-  } else{
+  } else {
     selectedEpisode = allEpisodes;
   }
   rootElem.innerHTML = "";
   makePageForEpisodes(selectedEpisode);
-})
+});
 
 searchField.addEventListener("keyup", (e) => {
   fetch(newShowUrl)
-  .then(function (response) {
-    return response.json();
-  })
-  .then((episodes) => {
-    allEpisodes = episodes;
-  }).catch((error) => console.log(error));
+    .then(function (response) {
+      return response.json();
+    })
+    .then((episodes) => {
+      allEpisodes = episodes;
+    })
+    .catch((error) => console.log(error));
   // console.log(allEpisodes);
   let episodesFound = "";
   let currentValue = e.target.value.toLowerCase();
@@ -225,11 +220,11 @@ searchField.addEventListener("keyup", (e) => {
       epi.name.toLowerCase().includes(currentValue) ||
       epi.summary.toLowerCase().includes(currentValue)
   );
-  matchEpisodeDisplay.innerHTML =  ` Displaying ${episodesFound.length} / ${allEpisodes.length} episodes`;
+  matchEpisodeDisplay.innerHTML = ` Displaying ${episodesFound.length} /  ${allEpisodes.length} episodes`;
   makePageForEpisodes(episodesFound);
 });
 
-function clearOptions(selectId){
+function clearOptions(selectId) {
   var select = document.getElementById(selectId);
   var length = select.options.length;
   for (i = length - 1; i >= 1; i--) {
@@ -241,6 +236,6 @@ const episodeCode = (season, number) => {
   season = season < 10 ? "0" + season : season;
   number = number < 10 ? "0" + number : number;
   return `S${season}E${number}`;
-}
+};
 
 window.onload = setup;
